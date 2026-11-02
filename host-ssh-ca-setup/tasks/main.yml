@@ -1,0 +1,105 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/host-ssh-ca-setup
+
+- name: debug distribution
+  debug: msg="{{ ansible_facts['distribution'] }}"
+- name: debug distribution_release
+  debug: msg="{{ ansible_facts['distribution_release'] }}"
+- name:
+  debug: msg="{{ ansible_facts['distribution_release'] }}"
+- name: adding Debian tailscale repository
+  when: ansible_facts['distribution'] == 'Debian' 
+  block:
+    - name:
+      when: ansible_facts['distribution_release'] == 'Bookworm'
+      block:
+      - name: installing /etc/ssh/sshd_config.d/55-host-ssh-ca.conf
+        become: yes
+        ansible.builtin.copy:
+          src: files/55-host-ssh-ca.conf
+          dest: "/etc/ssh/sshd_config.d/55-host-ssh-ca.conf"
+          owner: root
+          group: root
+          mode: '0600'
+        register: r_sshd_config
+    - name:
+      when: ansible_facts['distribution_release'] == 'trixie'
+      block:
+      - name: installing /etc/ssh/sshd_config.d/55-host-ssh-ca.conf
+        become: yes
+        ansible.builtin.copy:
+          src: files/55-host-ssh-ca.conf
+          dest: "/etc/ssh/sshd_config.d/55-host-ssh-ca.conf"
+          owner: root
+          group: root
+          mode: '0600'
+        register: r_sshd_config
+- name: adding Ubuntu tailscale repository
+  when: ansible_facts['distribution'] == 'Ubuntu' 
+  block:
+    - name:
+      when: ansible_facts['distribution_release'] == 'jammy'
+      block:
+      - name: installing /etc/ssh/sshd_config.d/55-host-ssh-ca.conf_ubuntu_22_04
+        become: yes
+        ansible.builtin.copy:
+          src: files/55-host-ssh-ca.conf_ubuntu_22_04
+          dest: "/etc/ssh/sshd_config.d/55-host-ssh-ca.conf"
+          owner: root
+          group: root
+          mode: '0600'
+        register: r_sshd_config
+    - name:
+      when: ansible_facts['distribution_release'] == 'noble'
+      block:
+      - name: installing /etc/ssh/sshd_config.d/55-host-ssh-ca.conf
+        become: yes
+        ansible.builtin.copy:
+          src: files/55-host-ssh-ca.conf
+          dest: "/etc/ssh/sshd_config.d/55-host-ssh-ca.conf"
+          owner: root
+          group: root
+          mode: '0600'
+        register: r_sshd_config
+
+
+- name: installing /etc/ssh/client-CA.pub
+  become: yes
+  ansible.builtin.copy:
+    content: |
+      @cert-authority * {{ host_ssh_ca_host_ca_pub }}
+    dest: "/etc/ssh/ssh_known_hosts"
+    owner: root
+    group: root
+    mode: '0600'
+
+
+- name: installing /etc/ssh/ssh_known_hosts
+  become: yes
+  ansible.builtin.copy:
+    content: |
+      {{ host_ssh_ca_client_ca_pub }}
+    dest: "/etc/ssh/client-CA.pub"
+    owner: root
+    group: root
+    mode: '0600'
+  register: r_client_ca_key
+
+- name: installing ssh host certificates
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/etc/ssh/"
+    owner: root
+    mode: '0600'
+  loop:
+    - "files/host/{{ inventory_hostname }}/ssh_host_ed25519_key"
+    - "files/host/{{ inventory_hostname }}/ssh_host_ed25519_key-cert.pub"
+    - "files/host/{{ inventory_hostname }}/ssh_host_ed25519_key.pub"
+  register: r_host_keys
+
+- name: Restart ssd.service
+  ansible.builtin.service:
+    name: ssh.service
+    state: restarted
+  when: r_sshd_config.changed or r_client_ca_key.changed or r_host_keys.changed

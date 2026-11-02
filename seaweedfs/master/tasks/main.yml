@@ -1,0 +1,25 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/seaweedfs/master
+
+- name: testing is seaweedfs_master_list is defined
+  assert:
+    that:
+      - seaweedfs_master_list is defined
+    fail_msg: "Required variable 'seaweedfs_master_list' is not defined"
+
+- name: Include task for each object
+  include_tasks: tasks/configure_master.yaml
+  loop: "{{ seaweedfs_master_list }}"
+  loop_control:
+    loop_var: master
+  vars:
+    ip: "{{ master.ip }}"
+    ip_bind: "{{ master.ip_bind }}"
+    svc_port: "{{ master.port }}"
+    svc_port_grpc: "{{ master.port_grpc }}"
+    peers: "{{ master.peers }}"
+    mdir: "{{ master.mdir }}"
+    container_name: "{{ master.container_name }}"
+    defaultReplication: "{{ master.defaultReplication }}"
+    volumeSizeLimitMB: "{{ master.volumeSizeLimitMB }}"

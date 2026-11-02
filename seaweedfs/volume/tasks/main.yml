@@ -1,0 +1,29 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/seaweedfs/volume
+
+- name: testing is seaweedfs_volume_list is defined
+  assert:
+    that:
+      - seaweedfs_volume_list is defined
+    fail_msg: "Required variable 'seaweedfs_volume_list' is not defined"
+
+- name: Include task for each object
+  include_tasks: tasks/configure_volume.yaml
+  loop: "{{ seaweedfs_volume_list }}"
+  loop_control:
+    loop_var: volume
+  vars:
+    container_name: "{{ volume.container_name }}"
+    ip: "{{ volume.ip }}"
+    ip_bind: "{{ volume.ip_bind }}"
+    svc_port: "{{ volume.port }}"
+    svc_port_grpc: "{{ volume.port_grpc }}"
+    masters: "{{ volume.masters }}"
+    dataCenter: "{{ volume.dataCenter }}"
+    rack: "{{ volume.rack }}"
+    max: "{{ volume.max }}"
+    dir: "{{ volume.dir }}"
+    index: "{{ volume.index }}"
+    compactionMBps: "{{ volume.compactionMBps }}"
+    maintenanceMBps: "{{ volume.maintenanceMBps }}"

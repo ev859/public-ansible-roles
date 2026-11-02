@@ -1,0 +1,19 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/seaweedfs/worker
+
+- name: testing is seaweedfs_worker_list is defined
+  assert:
+    that:
+      - seaweedfs_worker_list is defined
+    fail_msg: "Required variable 'seaweedfs_worker_list' is not defined"
+
+- name: Include task for each object
+  include_tasks: tasks/configure_worker.yaml
+  loop: "{{ seaweedfs_worker_list }}"
+  loop_control:
+    loop_var: worker
+  vars:
+    container_name: "{{ worker.container_name }}"
+    workingDir: "{{ worker.workingDir }}"
+    admin: "{{ worker.admin }}"

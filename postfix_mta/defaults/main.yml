@@ -1,0 +1,13 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for roles/postfix_mta
+
+postfix_relayhost: 'mail.email-server.invalid'
+postfix_relayhost_port: 465
+
+postfix_enforce_correct_sender: true
+postfix_sender_email: 'sender-user@email-server.invalid'
+postfix_user: "XXX"
+postfix_pass: "XXX"
+
+postfix_header_check_pcre: false

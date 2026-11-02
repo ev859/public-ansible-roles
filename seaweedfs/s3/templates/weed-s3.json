@@ -1,0 +1,24 @@
+{
+  "identities": [
+    {
+      "name": "admin_user",
+      "credentials": [
+        {
+          "accessKey": "{{ seaweedfs_s3_admin_access_key }}",
+          "secretKey": "{{ seaweedfs_s3_admin_secret_key }}"
+        }
+      ],
+      "actions": ["Admin", "Read", "Write", "List", "Tagging"]
+    },
+    {
+      "name": "admin_read_only_user",
+      "credentials": [
+        {
+          "accessKey": "{{ seaweedfs_s3_admin_ro_access_key }}",
+          "secretKey": "{{ seaweedfs_s3_admin_ro_secret_key }}"
+        }
+      ],
+      "actions": ["Read", "List"]
+    }
+  ]
+}

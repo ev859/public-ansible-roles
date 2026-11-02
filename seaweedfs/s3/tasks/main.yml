@@ -1,0 +1,21 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/seaweedfs/s3
+
+- name: testing is seaweedfs_s3_list is defined
+  assert:
+    that:
+      - seaweedfs_s3_list is defined
+    fail_msg: "Required variable 'seaweedfs_s3_list' is not defined"
+
+- name: Include task for each object
+  include_tasks: tasks/configure_s3.yaml
+  loop: "{{ seaweedfs_s3_list }}"
+  loop_control:
+    loop_var: s3
+  vars:
+    container_name: "{{ s3.container_name }}"
+    svc_port: "{{ s3.port }}"
+    svc_port_grpc: "{{ s3.port_grpc }}"
+    filer: "{{ s3.filer }}"
+    install_default_s3_conf: "{{ s3.install_default_s3_conf }}"

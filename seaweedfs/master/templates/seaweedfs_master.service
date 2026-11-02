@@ -1,0 +1,24 @@
+#SPDX-License-Identifier: MIT-0
+[Unit]
+Description=MyApp (system-wide) container
+After=network.target
+Wants=myapp-net.network
+
+[Container]
+Image=docker.io/library/nginx:stable
+#Restart=on-failure
+#Environment=APP_ENV=production
+Exec=/usr/local/bin/myapp --config /etc/myapp/config.yml --verbose
+#Ports=8080:80
+#Volumes=myapp-data:/usr/share/nginx/html:Z
+#Network=myapp-net
+# Extend start timeout to allow image pull on first boot
+TimeoutStartSec=300
+
+[Service]
+# Let systemd handle restart policy
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+

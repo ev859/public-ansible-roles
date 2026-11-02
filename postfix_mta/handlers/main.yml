@@ -1,0 +1,9 @@
+#SPDX-License-Identifier: MIT-0
+---
+# handlers file for roles/postfix_mta
+
+- name: config changed
+  ansible.builtin.systemd:
+    name: postfix.service
+    enabled: yes
+    state: restarted

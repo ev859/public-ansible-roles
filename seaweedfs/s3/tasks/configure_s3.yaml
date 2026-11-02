@@ -1,0 +1,45 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: create /etc/seaweedfs
+  ansible.builtin.file:
+    path: "/etc/seaweedfs"
+    state: directory
+    mode: '0750'
+    owner: 1000
+    group: 1000
+
+- name:
+  when:
+    - install_default_s3_conf is defined
+    - install_default_s3_conf | bool
+  block:
+    - name:
+      ansible.builtin.template:
+        src: templates/weed-s3.json
+        dest: /etc/seaweedfs/weed-s3.json 
+        mode: '0640'
+        owner: root
+        group: root
+      register: weed_s3_json
+
+- name: install {{ container_name }}.container
+  ansible.builtin.template:
+    src: templates/seaweedfs_s3.container
+    dest: "/etc/containers/systemd/{{ container_name }}.container"
+    owner: root
+    group: root
+    mode: '0644'
+  register: seaweedfs_service
+
+- name: reload systemctl if changed service
+  ansible.builtin.shell:
+    cmd: systemctl daemon-reload
+  when: seaweedfs_service.changed or weed_s3_json.changed
+
+- name: restart {{ container_name }}.service if config changed
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    name: "{{ container_name }}.service"
+    state: restarted
+    enabled: true
+  when: seaweedfs_service.changed or weed_s3_json.changed

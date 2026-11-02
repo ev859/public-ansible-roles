@@ -1,0 +1,3 @@
+/^From:\s*(.*<)(?!user@domain\.example>)[^>]+(>.*)$/           REPLACE From: ${1}{{ postfix_sender_email }}${2}
+/^From:\s*(?!.*user@domain\.example)([^<\s]+@[^>\s]+)(.*)$/    REPLACE From: {{ postfix_sender_email }}${2}
+

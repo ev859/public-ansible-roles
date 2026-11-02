@@ -1,0 +1,26 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for roles/seaweedfs/filer
+
+- name: testing is seaweedfs_filer_list is defined
+  assert:
+    that:
+      - seaweedfs_filer_list is defined
+    fail_msg: "Required variable 'seaweedfs_filer_list' is not defined"
+
+- name: Include task for each object
+  include_tasks: tasks/configure_filer.yaml
+  loop: "{{ seaweedfs_filer_list }}"
+  loop_control:
+    loop_var: filer
+  vars:
+    container_name: "{{ filer.container_name }}"
+    ip: "{{ filer.ip }}"
+    ip_bind: "{{ filer.ip_bind }}"
+    svc_port: "{{ filer.port }}"
+    svc_port_grpc: "{{ filer.port_grpc }}"
+    masters: "{{ filer.masters }}"
+    dataCenter: "{{ filer.dataCenter }}"
+    rack: "{{ filer.rack }}"
+    defaultStoreDir: "{{ filer.defaultStoreDir }}"
+    store: "{{ filer.store }}"

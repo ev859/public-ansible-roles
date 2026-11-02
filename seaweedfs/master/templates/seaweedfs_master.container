@@ -1,0 +1,33 @@
+#SPDX-License-Identifier: MIT-0
+[Unit]
+Description=Seaweedfs master {{ ip }}:{{ svc_port }}
+#After=network.target
+Requires=network-online.target
+After=network-online.target
+
+[Container]
+Image={{ seaweedfs_container }}
+#Restart=on-failure
+#Environment=APP_ENV=production
+#Entrypoint=/usr/bin/weed
+PodmanArgs=--entrypoint /usr/bin/weed
+{% if seaweedfs_security_enabled is sameas true %}
+Exec=master -mdir={{ mdir }} -peers={{ peers }} -ip={{ ip }} -ip.bind {{ ip_bind }} --port {{ svc_port }} --port.grpc {{ svc_port_grpc }} -defaultReplication={{ defaultReplication }} -volumeSizeLimitMB={{ volumeSizeLimitMB }} -disableHttp
+{% else %}
+Exec=master -mdir={{ mdir }} -peers={{ peers }} -ip={{ ip }} -ip.bind {{ ip_bind }} --port {{ svc_port }} --port.grpc {{ svc_port_grpc }} -defaultReplication={{ defaultReplication }} -volumeSizeLimitMB={{ volumeSizeLimitMB }}
+{% endif %}
+Volume={{ mdir }}:{{ mdir }}:z
+Volume=/etc/seaweedfs:/etc/seaweedfs:z,ro
+#Ports=8080:80
+#Volumes=myapp-data:/usr/share/nginx/html:Z
+#Network=myapp-net
+# Extend start timeout to allow image pull on first boot
+#TimeoutStartSec=300
+Network=host
+
+[Service]
+# Let systemd handle restart policy
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

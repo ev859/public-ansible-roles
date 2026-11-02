@@ -1,0 +1,60 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Create a directory
+  ansible.builtin.file:
+    path: "{{ dataDir }}"
+    state: directory
+    mode: '0755'
+    owner: 1000
+    group: 1000
+
+- name: install {{ container_name }}.container
+  ansible.builtin.template:
+    src: templates/seaweedfs_admin.container
+    dest: "/etc/containers/systemd/{{ container_name }}.container"
+    owner: root
+    group: root
+    mode: '0644'
+  register: seaweedfs_service
+
+- name: reload systemctl if changed service
+  ansible.builtin.shell:
+    cmd: systemctl daemon-reload
+  when: seaweedfs_service.changed
+
+
+- name: disable seaweedfs admin.toml
+  when: not ( seaweedfs_admin_toml_enabled | bool )
+  block:
+  - name: remove /etc/seaweedfs/admin.toml file
+    ansible.builtin.file:
+      state: absent
+      path: /etc/seaweedfs/admin.toml
+    register: admin_toml_removed
+
+- name: enable seaweedfs admin.toml
+  when: ( seaweedfs_admin_toml_enabled | bool )
+  block:
+  - name: Create a /etc/seaweedfs directory
+    ansible.builtin.file:
+      path: "/etc/seaweedfs"
+      state: directory
+      mode: '0750'
+      owner: 1000
+      group: 1000
+  - name: install /etc/seaweedfs/admin.toml file
+    ansible.builtin.template:
+      src: templates/admin.toml
+      dest: /etc/seaweedfs/admin.toml
+      owner: root
+      group: root
+      mode: '0644'
+    register: admin_toml_installed
+
+- name: restart {{ container_name }}.service if config changed
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    name: "{{ container_name }}.service"
+    state: restarted
+    enabled: true
+  when: seaweedfs_service.changed or admin_toml_removed.changed or admin_toml_installed.changed

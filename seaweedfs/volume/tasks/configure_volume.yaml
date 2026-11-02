@@ -1,0 +1,32 @@
+#SPDX-License-Identifier: MIT-0
+---
+- name: Create a directory
+  ansible.builtin.file:
+    path: "{{ dir }}"
+    state: directory
+    mode: '0755'
+    owner: 1000
+    group: 1000
+
+- name: Copy local file to remote destination
+  ansible.builtin.template:
+    src: templates/seaweedfs_volume.container
+    #dest: "/etc/systemd/system/{{ container_name }}.container"
+    dest: "/etc/containers/systemd/{{ container_name }}.container"
+    owner: root
+    group: root
+    mode: '0644'
+  register: seaweedfs_service
+
+- name: reload systemctl if changed service
+  ansible.builtin.shell:
+    cmd: systemctl daemon-reload
+  when: seaweedfs_service.changed
+
+- name: restart {{ container_name }}.service if config changed
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+    name: "{{ container_name }}.service"
+    state: restarted
+    enabled: true
+  when: seaweedfs_service.changed

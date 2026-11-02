@@ -1,0 +1,22 @@
+[maintenance.vacuum]
+enabled = true
+garbage_threshold = 0.3        # vacuum volumes with more deleted content than this ratio
+scan_interval_seconds = 7200
+max_concurrent = 2
+min_volume_age_seconds = 86400 # rounded up to whole hours
+
+[maintenance.balance]
+imbalance_threshold = 0.2
+scan_interval_seconds = 1800
+max_concurrent = 1
+min_server_count = 2
+
+[maintenance.erasure_coding]
+fullness_ratio = 0.95
+quiet_for_seconds = 3600
+scan_interval_seconds = 3600
+max_concurrent = 1
+min_size_mb = 30
+collection_filter = ""
+preferred_tags = ["fast", "ssd"]
+replica_placement = ""

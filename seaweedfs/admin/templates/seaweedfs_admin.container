@@ -1,0 +1,20 @@
+#SPDX-License-Identifier: MIT-0
+[Unit]
+Description=Seaweedfs admin :{{ svc_port }}
+#After=network.target
+Requires=network-online.target
+After=network-online.target
+
+[Container]
+PodmanArgs=--entrypoint /usr/bin/weed
+Image={{ seaweedfs_container }}
+Exec=admin -port {{ svc_port }} -port.grpc {{ svc_port_grpc }} -master={{ masters }} -dataDir {{ dataDir }} -adminPassword {{ adminPassword }} -readOnlyUser {{ readOnlyUser }} -readOnlyPassword {{ readOnlyPassword }}
+Volume={{ dataDir}}:{{ dataDir }}:z
+Volume=/etc/seaweedfs:/etc/seaweedfs:z,ro
+Network=host
+
+[Service]
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

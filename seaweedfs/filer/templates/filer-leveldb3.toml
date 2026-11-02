@@ -1,0 +1,14 @@
+[filer.options]
+recursive_delete = false
+
+[leveldb2]
+enabled = false
+dir = "{{ defaultStoreDir }}/filerldb2"                    # directory to store level db files
+
+[leveldb3]
+enabled = true
+dir = "{{ defaultStoreDir }}/filerldb3"                    # directory to store level db files
+
+[rocksdb]
+enabled = false
+dir = "{{ defaultStoreDir }}/filerrdb"                    # directory to store rocksdb files
